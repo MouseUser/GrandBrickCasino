@@ -1,8 +1,8 @@
 package casino;
 
 public enum Suit {
+    CLUBS,
     HEARTS,
     SPADES,
-    CLUBS,
     DIAMONDS;
 }
