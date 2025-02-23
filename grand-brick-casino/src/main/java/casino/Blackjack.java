@@ -37,8 +37,8 @@ public class Blackjack extends Application {
     private Button splitButton = new Button("Split");
     private List<Card> dealerHand = new ArrayList<>();
     private List<Card> playerHand = new ArrayList<>();
-    private int dealerScore;
-    private int playerScore;
+    private int dealerScore = 0;
+    private int playerScore = 0;
     private boolean splittable;
     //upgradeable 'skills'
     private int luckLevel;
@@ -156,19 +156,22 @@ public class Blackjack extends Application {
                 dealerHandBox.getChildren().clear();
                 playerHand.clear();
                 playerHandBox.getChildren().clear();                
-                deal(playerHandBox, playerHand, new Card(false));
-                deal(playerHandBox, playerHand, new Card(false));
+                deal(playerHandBox, playerHand, createCard("player", false), "player");
+                deal(playerHandBox, playerHand, createCard("player", false), "player");
                 // if (playerHand.get(0).equals(playerHand.get(1))) {
                 //     splittable = true;
                 //     statusLabel.setText("Click Split to split your hand.");
                 // }
                 System.out.println("Initial cards dealt");
-                dealerScore = 0;
+                int dealerCards = 0;
                 while (dealerScore < 17) {
+                    boolean faceDown = true;
+                    if (dealerCards == 0) {
+                        faceDown = false;
+                    }
+                    deal(dealerHandBox, dealerHand, createCard("dealer", false), "dealer");
                     System.out.println(dealerScore);
-                    Card card = new Card(false);
-                    deal(dealerHandBox, dealerHand, card);
-                    dealerScore += card.getRank();
+                    dealerCards++;
                 }
                 if (dealerScore > 21) {
                     System.out.println("code worked and dealer bust");
@@ -186,14 +189,27 @@ public class Blackjack extends Application {
                 loss();
             }
         }
+    private Card createCard(String playerOrDealer, boolean faceDown) {
+        Card card = new Card(faceDown);
+        if (card.getValue() == 11) {
+            if (playerOrDealer.toLowerCase() == "player" && playerScore + 11 > 21) {
+                card.setValue(1);
+            }
+            else if (playerOrDealer.toLowerCase() == "dealer" && dealerScore + 11 > 21) {
+                card.setValue(1);
+            }
+        }
+        return card;
+        
+    }
     private void dealComp() {
         playerScore = 0;
         for (Card card : playerHand) {
-            playerScore += card.getRank();
+            playerScore += card.getValue();
         }
         dealerScore = 0;
         for (Card card : dealerHand) {
-            dealerScore += card.getRank();
+            dealerScore += card.getValue();
         }
         if ((playerScore > dealerScore && playerScore <= 21) || (dealerScore > 21 && playerScore <= 21)) {
             win();
@@ -203,7 +219,7 @@ public class Blackjack extends Application {
         }
     }
     private void hit() {
-            deal(playerHandBox, playerHand, new Card(false));
+            deal(playerHandBox, playerHand, createCard("player", false), "player");
             handEval();
             if (bust || blackjack) {
                 endPlayerTurn();
@@ -212,7 +228,7 @@ public class Blackjack extends Application {
     private void handEval() {
         playerScore = 0;
         for (Card card : playerHand) {
-            playerScore += card.getRank();
+            playerScore += card.getValue();
         }
         if (intelligence > 10 && ((playerScore >= 20) || playerScore <= 22)) {
             blackjack = true;
@@ -229,7 +245,7 @@ public class Blackjack extends Application {
     private String getCardImagePath(Card card) {
         return "file:assets/cards/" + card.getRank() + "_of_" + card.getSuit().toString().toLowerCase() + ".png";
     }    
-    private void deal(HBox handView, List<Card> hand, Card card) {
+    private void deal(HBox handView, List<Card> hand, Card card, String playerOrDealer) {
         ImageView cardView;
         if (card.getFaceDown()) {
             cardView = new ImageView(new Image("file:assets/cards/back.png"));
@@ -241,6 +257,12 @@ public class Blackjack extends Application {
         cardView.setFitHeight(120);
         hand.add(card);
         handView.getChildren().add(cardView);
+        if (playerOrDealer.toLowerCase() == "player") {
+            playerScore += card.getValue();
+        }
+        else if (playerOrDealer.toLowerCase() == "dealer") {
+            dealerScore += card.getValue();
+        }    
     }
     // private void split() {
     //     if (splittable) {
@@ -313,40 +335,41 @@ public class Blackjack extends Application {
         moneyAmount = moneyAmount - (currentBet);
         //subtracts betted money
     }
-    private void skillMenu (Stage primaryStage) {
-        primaryStage.setTitle("Skills Menu");
+    // private void skillMenu (Stage primaryStage) {
+    //     primaryStage.setTitle("Skills Menu");
 
-        // Create buttons for skills
-        Button skill1 = new Button("Luck");
-        Button skill2 = new Button("Payout");
-        Button skill3 = new Button("Intelligence");
+    //     // Create buttons for skills
+    //     Button LuckButton = new Button("Luck");
+    //     Button PayButton = new Button("Payout");
+    //     Button IntButton = new Button("Intelligence");
 
-        // Add action listeners to the buttons
-        // skill1.setOnAction(e -> Upgrade(1));
-        // skill2.setOnAction(e -> Upgrade(2));
-        // skill3.setOnAction(e -> Upgrade(3));
+    //     // Add action listeners to the buttons
+    //      LuckButton.setOnAction(e -> upgradeLuck());
+    //      PayButton.setOnAction(e -> upgradePay());
+    //      IntButton.setOnAction(e -> upgradeInt());
 
-        // Create a layout and add buttons to it
-        VBox layout = new VBox(10);
-        layout.getChildren().addAll(skill1, skill2, skill3);
+    //     // Create a layout and add buttons to it
+    //     VBox layout = new VBox(10);
+    //         layout.getChildren().addAll(LuckButton, PayButton, IntButton);
 
-        // Create a scene and add the layout to it
-        Scene scene = new Scene(layout, 300, 200);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    // private void upgrade(int number) {
-    //     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    //     alert.setTitle("Skill Selected");
-    //     alert.setHeaderText(null);
-    //     alert.setContentText(message);
-    //     alert.showAndWait();
-    //     if (alert) {
-
-    //     }
+    //     // Create a scene and add the layout to it
+    //     Scene scene = new Scene(layout, 300, 200);
+    //     primaryStage.setScene(scene);
+    //     primaryStage.show();
     // }
 
+    // private void upgradeLuck(int number) {
+    //     Luck++;
+    //     moneyAmount -= luckCost
+    //  }
+    // private void upgradePay(int number) {
+    //     Payout++;
+    //     moneyAmount -= payoutCost
+    //  }
+    // private void upgradeInt(int number) {
+    //     Intelligence++;
+    //     moneyAmount -= intCost
+    //  }
     public static void main(String[] args) {
         launch(args);
     }

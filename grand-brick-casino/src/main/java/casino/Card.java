@@ -12,7 +12,10 @@ public class Card {
     public Card(boolean faceDown) {
         Random random = new Random();
         rank = random.nextInt(14) + 1;
-        if (rank > 10) {
+        if (rank == 1) {
+            rank = 2;
+        }
+        else if (rank > 10) {
             value = 10;
             if (rank == 14) {
                 value = 11;
@@ -43,6 +46,9 @@ public class Card {
     }
     public int getValue() {
         return value;
+    }
+    public void setValue(int value) {
+        this.value = value;
     }
     @Override
     public String toString() {
