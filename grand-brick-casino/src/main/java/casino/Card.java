@@ -14,12 +14,16 @@ public class Card {
         rank = random.nextInt(14) + 1;
         if (rank == 1) {
             rank = 2;
+            value = 2;
         }
         else if (rank > 10) {
             value = 10;
             if (rank == 14) {
                 value = 11;
             }
+        }
+        else {
+            value = rank;
         }
         suit = SUITS[random.nextInt(SUITS.length)];
         this.faceDown = faceDown;
