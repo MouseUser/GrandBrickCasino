@@ -1,22 +1,13 @@
 package casino;
 
-import java.util.Random;
-
 public class Card {
-    private static final Suit[] SUITS = {Suit.CLUBS, Suit.SPADES, Suit.CLUBS, Suit.DIAMONDS};
     private int rank;
     private Suit suit;
     private int value;
     private boolean faceDown;
 
-    public Card(boolean faceDown) {
-        Random random = new Random();
-        rank = random.nextInt(14) + 1;
-        if (rank == 1) {
-            rank = 2;
-            value = 2;
-        }
-        else if (rank > 10) {
+    public Card(int rank, Suit suit) {
+        if (rank > 10) {
             value = 10;
             if (rank == 14) {
                 value = 11;
@@ -25,8 +16,8 @@ public class Card {
         else {
             value = rank;
         }
-        suit = SUITS[random.nextInt(SUITS.length)];
-        this.faceDown = faceDown;
+        this.rank = rank;
+        this.suit = suit;
     }
     @Override
     public boolean equals(Object obj) {

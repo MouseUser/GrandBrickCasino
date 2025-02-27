@@ -1,30 +1,23 @@
 package casino;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 
-import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Blackjack extends Application {
@@ -50,6 +43,7 @@ public class Blackjack extends Application {
     private Button playAgain = new Button("Play again?");
     private List<Card> dealerHand = new ArrayList<>();
     private List<Card> playerHand = new ArrayList<>();
+    private Stack<Card> deck = new Stack<>();
     private int dealerScore;
     private int playerScore;
     //upgradeable 'skills'
@@ -65,7 +59,6 @@ public class Blackjack extends Application {
     private int moneyAmount = 1000;
     private int betMultiplier = 1;
 
-    private boolean stand;
     private boolean blackjack;
     private boolean bust;
 
@@ -89,12 +82,14 @@ public class Blackjack extends Application {
         
         // Dealer Area
         VBox dealerBox = new VBox(10, dealerLabel, dealerHandBox);
+        dealerLabel.setFont(new Font("Arial", 18));
         dealerBox.setStyle("-fx-alignment: center;");
         dealerHandBox.setStyle("-fx-padding: 10px;");
         dealerHandBox.setAlignment(Pos.CENTER);
         
         // Player Area
-        VBox playerBox = new VBox(10, playerHandBox);
+        VBox playerBox = new VBox(10, playerHandBox, new Label("Your Hand"));
+
         playerBox.setStyle("-fx-alignment: center;");
         playerHandBox.setStyle("-fx-padding: 10px;");
         playerHandBox.setAlignment(Pos.CENTER);
@@ -107,7 +102,10 @@ public class Blackjack extends Application {
         HBox buttonBox = new HBox(10, hitButton, standButton, playAgain);
         buttonBox.setStyle("-fx-alignment: center;");
         statusLabel.setText("Game has started.");
+        statusLabel.setFont(new Font("Arial", 16));
+        statusLabel.setStyle("-fx-alignment: center");
         VBox bottomBox = new VBox(10, buttonBox, statusLabel);
+        bottomBox.setAlignment(Pos.CENTER);
         
         root.setTop(dealerBox);
         root.setCenter(playerBox);
@@ -151,6 +149,14 @@ public class Blackjack extends Application {
         changeScene(stage, blackjackGame);
         gameplay();
     }
+    private void createDeck() {
+        for (int rank = 2; rank <= 14; rank++) {
+            for (Suit suit : Suit.values()) {
+                deck.add(new Card(rank, suit));
+            }
+        }
+        Collections.shuffle(deck);
+    }
     private void changeScene(Stage stage, Scene scene) {
         stage.setScene(scene);
     }
@@ -162,7 +168,6 @@ public class Blackjack extends Application {
         shopButton.setDisable(false);
     }
     private void stand() {
-        stand = true;
         endPlayerTurn();
     }
     private boolean buyIn() {
@@ -199,21 +204,22 @@ public class Blackjack extends Application {
         playAgain.setDisable(true);
         shopButton.setDisable(true);
             if (buyIn()) {
+                createDeck();
                 dealerHand.clear();
                 dealerHandBox.getChildren().clear();
                 playerHand.clear();
                 playerHandBox.getChildren().clear();
                 dealerScore = 0;
                 playerScore = 0;
-                deal(playerHand, createCard("player", false), "player");
-                deal(playerHand, createCard("player", false), "player");
+                deal(playerHand, false, "player");
+                deal(playerHand, false, "player");
                 int dealerCards = 0;
-                while (dealerScore < 17) {
+                while (dealerScore <= 17) {
                     boolean faceDown = true;
                     if (dealerCards == 0) {
                         faceDown = false;
                     }
-                    deal(dealerHand, createCard("dealer", faceDown), "dealer");
+                    deal(dealerHand, faceDown, "dealer");
                     dealerCards++;
                 }
                 dealerLabel.setText("The dealer has drawn his hand.");
@@ -238,19 +244,6 @@ public class Blackjack extends Application {
                 statusLabel.setText("You are out of money and cannot afford this bet.");
             }
         }
-    private Card createCard(String playerOrDealer, boolean faceDown) {
-        Card card = new Card(faceDown);
-        if (card.getValue() == 11) {
-            if (playerOrDealer.toLowerCase() == "player" && playerScore + 11 > 21) {
-                card.setValue(1);
-            }
-            else if (playerOrDealer.toLowerCase() == "dealer" && dealerScore + 11 > 21) {
-                card.setValue(1);
-            }
-        }
-        return card;
-        
-    }
     private void dealComp() {
         playerScore = 0;
         for (Card card : playerHand) {
@@ -270,7 +263,7 @@ public class Blackjack extends Application {
         }
     }
     private void hit() {
-            deal(playerHand, createCard("player", false), "player");
+            deal(playerHand, true, "player");
             handEval();
             if (bust || blackjack) {
                 endPlayerTurn();
@@ -324,15 +317,17 @@ public class Blackjack extends Application {
             dealerHandBox.getChildren().add(cardView);
         }
     }
-    private void deal(List<Card> hand, Card card, String playerOrDealer) {
-        hand.add(card);
-        refreshHandDisplays();
+    private void deal(List<Card> hand, boolean faceDown, String playerOrDealer) {
+        Card card = deck.pop();
         if (playerOrDealer.toLowerCase() == "player") {
             playerScore += card.getValue();
         }
         else if (playerOrDealer.toLowerCase() == "dealer") {
             dealerScore += card.getValue();
-        }    
+        }  
+        card.setFaceDown(faceDown);  
+        hand.add(card);
+        refreshHandDisplays();
     }
     private void win() {
         /**congradulate
