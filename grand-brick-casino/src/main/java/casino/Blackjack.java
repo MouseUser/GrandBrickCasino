@@ -140,7 +140,7 @@ public class Blackjack extends Application {
             refreshShopDisplay();
             currentMoneyLabel.setText("Current Balance:\n$" + moneyAmount);
             bettingLabel.setText("Currently Betting:\n" + "$" + currentBet);
-            payoutLabel.setText("Payout:\n" + betMultiplier + "x bet");
+            payoutLabel.setText("Payout:\n" + payoutLevel + "x bet");
         });
         
         stage.show();
@@ -182,7 +182,7 @@ public class Blackjack extends Application {
             //take money out of money and into bet
             currentBet = buyin;
             bettingLabel.setText("Currently Betting:\n" + "$" + currentBet);
-            payoutLabel.setText("Payout:\n" + betMultiplier + "x bet");
+            payoutLabel.setText("Payout:\n" + payoutLevel + "x bet");
             currentMoneyLabel.setText("Current Balance:\n$" + moneyAmount);
         }
         else {
@@ -238,7 +238,7 @@ public class Blackjack extends Application {
 
                     statusLabel.setText("Click Hit to get another card or Stand to end your turn.");
                 }
-                betMultiplier *= 2;
+                betMultiplier += 1;
             }
             else {
                 statusLabel.setText("You are out of money and cannot afford this bet.");
