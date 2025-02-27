@@ -263,7 +263,7 @@ public class Blackjack extends Application {
         }
     }
     private void hit() {
-            deal(playerHand, true, "player");
+            deal(playerHand, false, "player");
             handEval();
             if (bust || blackjack) {
                 endPlayerTurn();
